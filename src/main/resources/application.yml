@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: PRODUCT_WAREHOUSE_SERVICE
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  secret-key: ${JWT_SECRET:dskjkjkUXUXKJKSskjfdosidufikxjcvfjfkajdlJKDeruixoiXJOUDHkjljxifOXJCKJAOAQSXOPQJZXN}
+  expiration-time: ${EXPIRATION_TIME:70000}
+

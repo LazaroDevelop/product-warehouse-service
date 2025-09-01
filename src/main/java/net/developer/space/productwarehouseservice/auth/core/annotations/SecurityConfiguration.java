@@ -8,5 +8,4 @@ import java.lang.annotation.*;
 @Configuration
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SecurityConfiguration {
-}
+public @interface SecurityConfiguration {}

@@ -6,16 +6,13 @@ import net.developer.space.productwarehouseservice.auth.application.dtos.Authent
 import net.developer.space.productwarehouseservice.auth.application.dtos.AuthorizationRequest;
 import net.developer.space.productwarehouseservice.auth.application.dtos.RegisterRequest;
 import net.developer.space.productwarehouseservice.auth.application.ports.input.IAuthenticationService;
-import net.developer.space.productwarehouseservice.auth.core.annotations.OutputAdapter;
-import net.developer.space.productwarehouseservice.auth.core.annotations.OutputPort;
 import net.developer.space.productwarehouseservice.auth.domain.model.Role;
 import net.developer.space.productwarehouseservice.auth.domain.model.User;
-import net.developer.space.productwarehouseservice.auth.infrastructure.config.JwtGenerator;
 import net.developer.space.productwarehouseservice.auth.domain.repository.IUserRepository;
+import net.developer.space.productwarehouseservice.auth.infrastructure.config.JwtGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,28 +23,31 @@ public class AuthenticationService implements IAuthenticationService {
 
     private final JwtGenerator generator;
 
-    private final IUserRepository outputPort;
+    private final IUserRepository userAdapter;
 
     private final PasswordEncoder passwordEncoder;
 
     private final AuthenticationManager authenticationManager;
 
+    private static final String BEARER = "Bearer ";
+
     @Override
     public AuthenticationResponse register(RegisterRequest registerRequest){
 
         var user = User.builder()
-                .firstName(registerRequest.getFirstName())
-                .lastName(registerRequest.getLastName())
+                .firstName(registerRequest.getFirstname())
+                .lastName(registerRequest.getLastname())
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .role(Role.USER)
                 .build();
 
-        outputPort.save(user);
+        userAdapter.save(user);
 
         var jwtToken = generator.generateToken(user);
 
         return AuthenticationResponse.builder()
+                .tokenType(BEARER)
                 .accessToken(jwtToken)
                 .build();
     }
@@ -55,19 +55,19 @@ public class AuthenticationService implements IAuthenticationService {
     @Override
     public AuthenticationResponse authenticate(AuthorizationRequest authorizationRequest){
 
-        log.info("passowrd {}", authorizationRequest.getPassword());
+        log.debug("passowrd {}", authorizationRequest.getPassword());
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                authorizationRequest.getUserName(),
+                authorizationRequest.getUsername(),
                 authorizationRequest.getPassword()
         ));
 
-        var user = outputPort.findByEmail(authorizationRequest.getUserName())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        var user = userAdapter.findByEmail(authorizationRequest.getUsername());
 
         var jwtToken = generator.generateToken(user);
 
         return AuthenticationResponse.builder()
+                .tokenType(BEARER)
                 .accessToken(jwtToken)
                 .build();
     }

@@ -13,3 +13,5 @@ jwt:
   secret-key: ${JWT_SECRET:dskjkjkUXUXKJKSskjfdosidufikxjcvfjfkajdlJKDeruixoiXJOUDHkjljxifOXJCKJAOAQSXOPQJZXN}
   expiration-time: ${EXPIRATION_TIME:70000}
 
+product:
+  excluded-name: "tomato"
